@@ -78,13 +78,13 @@ def submit_personality():
     user_id = get_jwt_identity()
     data = request.json
     
-    if not data or 'answers' not in data:
-        return jsonify({'error': 'Missing answers data'}), 422
+    if not data:
+        return jsonify({'error': 'Missing request data'}), 422
         
     answers = data.get('answers', [])
-    # Accept partial submissions (allow user to submit answered questions)
-    if not answers or len(answers) == 0:
-        return jsonify({'error': 'No answers provided'}), 422
+    # Accept partial or empty submissions to avoid blocking users
+    if not isinstance(answers, list):
+        return jsonify({'error': 'Answers must be an array'}), 422
     
     type_counts = {'analytical': 0, 'creative': 0, 'empathetic': 0, 'collaborative': 0, 'organizational': 0}
     

@@ -73,6 +73,19 @@ def login_page():
 def signup_page():
     return render_template('signup.html')
 
+@app.route('/baby-monitor')
+def baby_monitor_page():
+    return render_template('baby-monitor.html')
+
+@app.route('/ai-mentor')
+def ai_mentor_page():
+    return render_template('ai-mentor.html')
+
+@app.route('/logout')
+def logout_page():
+    # We'll render a basic logout page that will handle token cleanup
+    return render_template('logout.html')
+
 @app.route('/health')
 def health():
     return jsonify({'status': 'healthy', 'message': 'SkillBloom API is running'}), 200

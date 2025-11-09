@@ -15,7 +15,7 @@ try:
     if api_key:
         genai.configure(api_key=api_key)
         # model selection - keep this configurable in case environments differ
-        model = genai.GenerativeModel(os.environ.get('GEMINI_MODEL', 'gemini-2.0-flash'))
+        model = genai.GenerativeModel(os.environ.get('GEMINI_MODEL', 'gemini-2.0-flash-exp'))
     else:
         model = None
 except Exception:
@@ -81,18 +81,28 @@ CAREER_RECOMMENDATIONS = {
 def chat():
     user_id = get_jwt_identity()
     data = request.json
-    query = data.get('query', '')
+    
+    if not data or 'query' not in data:
+        return jsonify({'error': 'Missing query in request'}), 422
+        
+    query = data.get('query', '').strip()
+    if not query:
+        return jsonify({'error': 'Empty query'}), 422
     
     try:
         from backend.models.database import get_user_by_id
         user = get_user_by_id(user_id)
+        
+        # If user profile isn't found, create a basic one to avoid errors
+        if not user:
+            user = {'name': 'User', 'personality': 'Not yet assessed', 'skills': [], 'career_gap': 0}
         
         context = f"""You are an AI career mentor for SkillBloom, a platform helping mothers return to work after a career break.
         
 User Profile:
 - Name: {user.get('name', 'User')}
 - Personality Type: {user.get('personality', 'Not yet assessed')}
-- Skills: {user.get('skills', 'Not yet assessed')}
+- Skills: {', '.join(user.get('skills', [])) if isinstance(user.get('skills'), list) else 'Not yet assessed'}
 - Career Gap: {user.get('career_gap', 0)} years
 
 Be empathetic, encouraging, and provide practical career advice. Focus on:
@@ -105,11 +115,14 @@ User Question: {query}
 
 Respond in a warm, supportive tone in 2-3 sentences."""
 
-        response_obj = model.generate_content(context)
-        response = response_obj.text
+        if model:
+            response_obj = model.generate_content(context)
+            response = response_obj.text
+        else:
+            response = get_ai_mentor_response(context, query)
         
     except Exception as e:
-        response = "I'm here to support your career journey! Could you tell me more about what you'd like help with?"
+        response = get_ai_mentor_response("", query)
     
     conn = get_db()
     cursor = conn.cursor()
@@ -152,7 +165,8 @@ def recommend_roles():
         }), 200
     
     try:
-        prompt = f"""Based on the following profile, recommend 3 specific job roles for a mother returning to work:
+        if model:
+            prompt = f"""Based on the following profile, recommend 3 specific job roles for a mother returning to work:
 
 Personality Type: {personality}
 Skills/Experience: {', '.join(skills) if skills else 'General professional experience'}
@@ -165,22 +179,24 @@ For each role, provide:
 
 Format as JSON array with 3 items, each having: role, match_score (number), reason"""
 
-        response = model.generate_content(prompt)
-        response_text = response.text
-        
-        import json
-        import re
-        json_match = re.search(r'\[.*\]', response_text, re.DOTALL)
-        if json_match:
-            recommendations = json.loads(json_match.group())
+            response = model.generate_content(prompt)
+            response_text = response.text
+            
+            import json
+            import re
+            json_match = re.search(r'\[.*\]', response_text, re.DOTALL)
+            if json_match:
+                recommendations = json.loads(json_match.group())
+            else:
+                raise ValueError("No JSON found in response")
         else:
-            raise ValueError("No JSON found in response")
+            raise ValueError("Model not configured")
             
     except Exception as e:
         roles = CAREER_RECOMMENDATIONS.get(personality.lower(), CAREER_RECOMMENDATIONS.get('collaborative', []))
         recommendations = []
-        for role in roles[:3]:
-            match_score = 70 + (len(skills) * 5)
+        for i, role in enumerate(roles[:3]):
+            match_score = 70 + (len(skills) * 5) + (i * 2)
             if match_score > 95:
                 match_score = 95
             recommendations.append({

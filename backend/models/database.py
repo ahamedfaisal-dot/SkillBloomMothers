@@ -123,23 +123,72 @@ def update_user_profile(user_id, skills=None, personality=None, career_gap=None)
     conn = get_db()
     cursor = conn.cursor()
     
-    updates = []
-    params = []
-    
-    if skills is not None:
-        updates.append("skills = ?")
-        params.append(json.dumps(skills) if isinstance(skills, list) else skills)
-    if personality is not None:
-        updates.append("personality = ?")
-        params.append(personality)
-    if career_gap is not None:
-        updates.append("career_gap = ?")
-        params.append(career_gap)
-    
-    if updates:
-        params.append(user_id)
-        query = f"UPDATE users SET {', '.join(updates)} WHERE id = ?"
-        cursor.execute(query, params)
+    try:
+        updates = []
+        params = []
+        
+        if skills is not None:
+            updates.append("skills = ?")
+            params.append(json.dumps(skills) if isinstance(skills, list) else skills)
+        if personality is not None:
+            updates.append("personality = ?")
+            params.append(personality)
+        if career_gap is not None:
+            updates.append("career_gap = ?")
+            params.append(career_gap)
+        
+        if updates:
+            params.append(user_id)
+            query = f"UPDATE users SET {', '.join(updates)} WHERE id = ?"
+            cursor.execute(query, params)
+            conn.commit()
+            
+        # Ensure user exists after update
+        cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
+        user = cursor.fetchone()
+        if not user:
+            conn.close()
+            return False
+            
+        return True
+    except Exception as e:
+        print(f"Error updating user profile: {str(e)}")
+        return False
+    finally:
+        conn.close()
+
+def save_ai_chat(user_id, query, response):
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute('''
+            INSERT INTO ai_logs (user_id, query, response)
+            VALUES (?, ?, ?)
+        ''', (user_id, query, response))
         conn.commit()
-    
-    conn.close()
+        return True
+    except Exception as e:
+        print(f"Error saving AI chat: {str(e)}")
+        return False
+    finally:
+        conn.close()
+
+def save_assessment(user_id, test_type, answers, score, personality_type=None, skill_category=None):
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute('''
+            INSERT INTO assessments (
+                user_id, test_type, answers, score, 
+                personality_type, skill_category
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (user_id, test_type, json.dumps(answers), score, 
+              personality_type, skill_category))
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error saving assessment: {str(e)}")
+        return False
+    finally:
+        conn.close()
