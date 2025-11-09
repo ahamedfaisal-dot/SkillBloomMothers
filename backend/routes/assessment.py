@@ -82,8 +82,9 @@ def submit_personality():
         return jsonify({'error': 'Missing answers data'}), 422
         
     answers = data.get('answers', [])
-    if not answers or len(answers) != len(PERSONALITY_QUESTIONS):
-        return jsonify({'error': 'Invalid number of answers'}), 422
+    # Accept partial submissions (allow user to submit answered questions)
+    if not answers or len(answers) == 0:
+        return jsonify({'error': 'No answers provided'}), 422
     
     type_counts = {'analytical': 0, 'creative': 0, 'empathetic': 0, 'collaborative': 0, 'organizational': 0}
     
@@ -103,8 +104,11 @@ def submit_personality():
             
         type_counts[question['type']] += rating
     
+    # Determine personality type and score based on provided answers
     personality_type = max(type_counts, key=type_counts.get)
-    score = (sum(type_counts.values()) / (len(PERSONALITY_QUESTIONS) * 5)) * 100
+    # Normalize score by number of answered questions (each rating is up to 5)
+    total_possible = len(answers) * 5
+    score = (sum(type_counts.values()) / total_possible) * 100 if total_possible > 0 else 0
     
     conn = get_db()
     cursor = conn.cursor()
@@ -217,7 +221,8 @@ def recommend():
     if not personality:
         return jsonify({'error': 'Missing personality type'}), 422
         
-    if personality not in ['analytical', 'creative', 'empathetic', 'collaborative', 'organizational']:
+    # allow unknown personality strings (don't block recommendations)
+    if personality and not isinstance(personality, str):
         return jsonify({'error': 'Invalid personality type'}), 422
         
     skill = data.get('skill')

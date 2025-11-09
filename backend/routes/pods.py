@@ -95,7 +95,7 @@ def update_progress():
     if user_id is None:
         message = 'Pod progress updated (demo)'
         if badge_earned and progress == 100:
-            message = f'Congratulations! You earned the {pod_type.replace("_", " ").title()} Badge! 🎉'
+            message = f'Congratulations! You earned the {pod_type.replace("_", " ").title()} Badge!'
         return jsonify({'message': message, 'progress': progress, 'badge_earned': bool(badge_earned)}), 200
 
     conn = get_db()
@@ -118,7 +118,7 @@ def update_progress():
 
     message = 'Pod progress updated'
     if badge_earned and progress == 100:
-        message = f'Congratulations! You earned the {pod_type.replace("_", " ").title()} Badge! 🎉'
+        message = f'Congratulations! You earned the {pod_type.replace("_", " ").title()} Badge!'
 
     return jsonify({
         'message': message,

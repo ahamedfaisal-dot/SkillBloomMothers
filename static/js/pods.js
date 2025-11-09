@@ -63,18 +63,19 @@ async function openPodModal(podType) {
     }
 
     const podTitles = {
-        skill: '💡 Skill Pod',
-        company: '🏢 Company Pod',
-        health: '❤️ Health Pod',
-        baby_monitor: '👶 Baby Monitor Pod',
-        mental_health: '🧠 Mental Health Pod',
-        post_placement: '📈 Post-Placement Pod'
+        skill: 'Skill Pod',
+        company: 'Company Pod',
+        health: 'Health Pod',
+        baby_monitor: 'Baby Monitor Pod',
+        mental_health: 'Mental Health Pod',
+        post_placement: 'Post-Placement Pod'
     };
-    
-    modalTitle.textContent = podTitles[podType];
+
+    modalTitle.textContent = podTitles[podType] || 'Pod Details';
     
     if (podType === 'skill') {
-        modalBody.innerHTML = getSkillPodContent(tasks);
+        // getSkillPodContent is async, await it
+        modalBody.innerHTML = await getSkillPodContent(tasks);
         renderPodTasks(podType, tasks);
     } else if (podType === 'company') {
         modalBody.innerHTML = getCompanyPodContent(tasks);
@@ -134,17 +135,11 @@ async function getSkillPodContent(tasks) {
                         <div class="skills-list">
                             ${path.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
                         </div>
-                        <div class="path-actions">
-                            <button class="btn btn-primary enroll-btn" data-path="${path.id}">
-                                Start Learning
-                            </button>
-                            <button class="btn btn-secondary mentor-btn" data-path="${path.id}">
-                                Ask AI Mentor
-                            </button>
-                            <button class="btn btn-info assessment-btn" data-path="${path.id}">
-                                Take Assessment
-                            </button>
-                        </div>
+                                    <div class="path-actions">
+                                        <button class="btn btn-primary enroll-btn" data-path="${path.id}">Start Learning</button>
+                                        <button class="btn btn-secondary mentor-btn" data-path="${path.id}">Ask AI Mentor</button>
+                                        <button class="btn btn-info assessment-btn" data-path="${path.id}">Take Assessment</button>
+                                    </div>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%"></div>
                         </div>
@@ -177,10 +172,11 @@ async function getSkillPodContent(tasks) {
                 </div>
             </div>
         </div>
+
     `;
 }
-}
 
+// helper to render tasks into the modal
 // helper to render tasks into the modal
 function renderPodTasks(podType, tasks) {
     const container = document.getElementById('podTasks');
@@ -245,7 +241,7 @@ function getCompanyPodContent() {
                 <div class="progress-fill" style="width: 60%"></div>
             </div>
             <p>Progress: 60%</p>
-            <p>Upon completion: <strong>Guaranteed Interview Unlocked! 🎉</strong></p>
+            <p>Upon completion: <strong>Guaranteed Interview Unlocked!</strong></p>
             <button class="btn btn-primary" onclick="updatePodProgress('company', 100)">Submit Project</button>
         </div>
     `;
@@ -259,10 +255,10 @@ function getHealthPodContent() {
                 <div class="form-group">
                     <label>Mood:</label>
                     <select id="mood" class="form-control">
-                        <option value="happy">😊 Happy</option>
-                        <option value="calm">😌 Calm</option>
-                        <option value="tired">😴 Tired</option>
-                        <option value="anxious">😰 Anxious</option>
+                        <option value="happy">Happy</option>
+                            <option value="calm">Calm</option>
+                            <option value="tired">Tired</option>
+                            <option value="anxious">Anxious</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -295,7 +291,7 @@ function getBabyMonitorContent() {
                 </div>
             </div>
             <div id="babyAlert" style="display:none; background: var(--warning); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
-                <strong>⚠️ Alert:</strong> <span id="alertMessage"></span>
+                <strong>Alert:</strong> <span id="alertMessage"></span>
             </div>
             <canvas id="babyChart" style="margin-top: 2rem;"></canvas>
         </div>

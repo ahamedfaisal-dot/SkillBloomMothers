@@ -7,8 +7,21 @@ import google.generativeai as genai
 
 bp = Blueprint('ai_mentor', __name__, url_prefix='/api/ai')
 
-genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
-model = genai.GenerativeModel('gemini-1.5-flash')
+# Configure the generative AI client if an API key is present. The actual
+# API key must be provided via the GEMINI_API_KEY environment variable and
+# must NOT be committed to source control. .env is already listed in .gitignore.
+try:
+    api_key = os.environ.get('GEMINI_API_KEY')
+    if api_key:
+        genai.configure(api_key=api_key)
+        # model selection - keep this configurable in case environments differ
+        model = genai.GenerativeModel(os.environ.get('GEMINI_MODEL', 'gemini-2.0-flash'))
+    else:
+        model = None
+except Exception:
+    # If the google generative SDK isn't available or configuration fails,
+    # keep model as None and fall back to canned responses below.
+    model = None
 
 RESPONSES = {
     'resume': [
@@ -195,3 +208,35 @@ def get_history():
     conn.close()
     
     return jsonify([dict(row) for row in logs]), 200
+
+
+def get_ai_mentor_response(context: str, question: str) -> str:
+    """Return an AI-generated mentor response.
+
+    This helper uses the configured generative model when an API key is
+    present. If the model call fails (or SDK missing), it falls back to a
+    friendly canned response from RESPONSES.
+    """
+    prompt = f"{context}\nUser Question: {question}\nPlease respond in 2-3 concise, supportive sentences."
+
+    # Try calling the generative model if configured
+    if model is not None:
+        try:
+            response_obj = model.generate_content(prompt)
+            text = getattr(response_obj, 'text', None) or str(response_obj)
+            if text and text.strip():
+                return text.strip()
+        except Exception:
+            # Fall through to canned responses on any failure
+            pass
+
+    # Fallback: choose category-based canned responses when possible
+    # Try to find a matching keyword in the topic/context
+    lc = (context or '').lower() + ' ' + (question or '').lower()
+    for key in RESPONSES:
+        if key in lc:
+            # return the first canned suggestion
+            return RESPONSES[key][0]
+
+    # Default fallback
+    return RESPONSES['default'][0]

@@ -127,7 +127,7 @@ function displayRecommendations(data) {
     let html = `<p><strong>Based on your ${data.personality} personality:</strong></p>`;
     data.recommendations.forEach(rec => {
         html += `<div class="activity-item">
-            <span class="activity-icon">💼</span>
+                <span class="activity-icon"></span>
             <div>
                 <strong>${rec.role}</strong> (${rec.match_score}% match)
                 <br><small>${rec.reason}</small>

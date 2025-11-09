@@ -215,10 +215,10 @@ def calculate_overall_progress(results, total_topics):
 def get_score_feedback(score):
     """Get feedback message based on assessment score"""
     if score >= 90:
-        return "Excellent! You've mastered this topic! 🎉"
+        return "Excellent! You've mastered this topic!"
     elif score >= 70:
-        return "Good job! You're showing strong understanding! 👍"
+        return "Good job! You're showing strong understanding!"
     elif score >= 50:
-        return "You're making progress! Keep practicing! 💪"
+        return "You're making progress! Keep practicing!"
     else:
-        return "Keep learning! Review the material and try again! 📚"
+        return "Keep learning! Review the material and try again!"
