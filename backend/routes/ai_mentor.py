@@ -1,0 +1,197 @@
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from backend.models.database import get_db
+from datetime import datetime
+import os
+import google.generativeai as genai
+
+bp = Blueprint('ai_mentor', __name__, url_prefix='/api/ai')
+
+genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
+model = genai.GenerativeModel('gemini-1.5-flash')
+
+RESPONSES = {
+    'resume': [
+        "Highlight your key achievements and add measurable outcomes.",
+        "Use action verbs and quantify your impact with numbers.",
+        "Tailor your resume to each job description and emphasize relevant skills.",
+        "Include a strong summary that showcases your unique value proposition."
+    ],
+    'anxious': [
+        "That's completely natural. Start small and celebrate every progress.",
+        "Remember, many mothers successfully return to work. You're not alone in this journey.",
+        "Focus on your strengths and the valuable skills you've developed during your break.",
+        "Take it one day at a time. Progress, not perfection, is what matters."
+    ],
+    'skills': [
+        "Consider online courses in your field to refresh your knowledge.",
+        "Practice with small projects to build confidence in your skills.",
+        "Join professional communities to stay updated with industry trends.",
+        "Your life experience is valuable - don't underestimate transferable skills!"
+    ],
+    'interview': [
+        "Practice common interview questions and prepare your answers in advance.",
+        "Research the company thoroughly and prepare thoughtful questions to ask.",
+        "Be honest about your career gap - frame it as a period of personal growth.",
+        "Prepare specific examples that demonstrate your skills and achievements."
+    ],
+    'balance': [
+        "Work-life balance is achievable with proper planning and boundaries.",
+        "Communicate your needs clearly with your employer from the start.",
+        "Remember that it's okay to ask for flexible arrangements.",
+        "Prioritize self-care - you can't pour from an empty cup."
+    ],
+    'confidence': [
+        "Your experiences as a mother have given you unique skills employers value.",
+        "Set small, achievable goals to build momentum and confidence.",
+        "Surround yourself with supportive people who believe in you.",
+        "Remember: impostor syndrome affects everyone. You deserve to be here."
+    ],
+    'default': [
+        "I'm here to support you in your career re-entry journey.",
+        "Every challenge is an opportunity to grow. You've got this!",
+        "Your unique perspective and experience are valuable assets.",
+        "Remember to be kind to yourself during this transition."
+    ]
+}
+
+CAREER_RECOMMENDATIONS = {
+    'analytical': ['Data Analyst', 'QA Engineer', 'Project Manager', 'Business Analyst', 'Financial Analyst'],
+    'creative': ['UI Designer', 'Content Strategist', 'Product Designer', 'Marketing Manager', 'Brand Manager'],
+    'empathetic': ['Customer Success', 'HR Associate', 'Social Worker', 'Healthcare Coordinator', 'Counselor'],
+    'collaborative': ['Team Lead', 'Scrum Master', 'Account Manager', 'Community Manager', 'Operations Manager'],
+    'organizational': ['Project Coordinator', 'Office Manager', 'Operations Specialist', 'Event Planner', 'Executive Assistant']
+}
+
+@bp.route('/chat', methods=['POST'])
+@jwt_required()
+def chat():
+    user_id = get_jwt_identity()
+    data = request.json
+    query = data.get('query', '')
+    
+    try:
+        from backend.models.database import get_user_by_id
+        user = get_user_by_id(user_id)
+        
+        context = f"""You are an AI career mentor for SkillBloom, a platform helping mothers return to work after a career break.
+        
+User Profile:
+- Name: {user.get('name', 'User')}
+- Personality Type: {user.get('personality', 'Not yet assessed')}
+- Skills: {user.get('skills', 'Not yet assessed')}
+- Career Gap: {user.get('career_gap', 0)} years
+
+Be empathetic, encouraging, and provide practical career advice. Focus on:
+- Building confidence for career re-entry
+- Addressing work-life balance concerns
+- Highlighting transferable skills from motherhood
+- Providing actionable career guidance
+
+User Question: {query}
+
+Respond in a warm, supportive tone in 2-3 sentences."""
+
+        response_obj = model.generate_content(context)
+        response = response_obj.text
+        
+    except Exception as e:
+        response = "I'm here to support your career journey! Could you tell me more about what you'd like help with?"
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO ai_logs (user_id, query, response)
+        VALUES (?, ?, ?)
+    ''', (user_id, query, response))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({
+        'response': response,
+        'timestamp': datetime.now().isoformat()
+    }), 200
+
+@bp.route('/recommendation', methods=['POST'])
+@jwt_required()
+def recommend_roles():
+    user_id = get_jwt_identity()
+    data = request.json
+    
+    from backend.models.database import get_user_by_id
+    user = get_user_by_id(user_id)
+    
+    personality = data.get('personality') or user.get('personality', '')
+    skills = data.get('skills', [])
+    
+    if not personality:
+        roles = CAREER_RECOMMENDATIONS.get('collaborative', CAREER_RECOMMENDATIONS['collaborative'])
+        recommendations = []
+        for role in roles[:3]:
+            recommendations.append({
+                'role': role,
+                'match_score': 75,
+                'reason': 'Complete your assessment for personalized recommendations'
+            })
+        return jsonify({
+            'personality': 'General',
+            'recommendations': recommendations
+        }), 200
+    
+    try:
+        prompt = f"""Based on the following profile, recommend 3 specific job roles for a mother returning to work:
+
+Personality Type: {personality}
+Skills/Experience: {', '.join(skills) if skills else 'General professional experience'}
+Career Gap: {user.get('career_gap', 0)} years
+
+For each role, provide:
+1. Job title
+2. Match percentage (realistic score)
+3. Brief reason why this role suits them
+
+Format as JSON array with 3 items, each having: role, match_score (number), reason"""
+
+        response = model.generate_content(prompt)
+        response_text = response.text
+        
+        import json
+        import re
+        json_match = re.search(r'\[.*\]', response_text, re.DOTALL)
+        if json_match:
+            recommendations = json.loads(json_match.group())
+        else:
+            raise ValueError("No JSON found in response")
+            
+    except Exception as e:
+        roles = CAREER_RECOMMENDATIONS.get(personality.lower(), CAREER_RECOMMENDATIONS.get('collaborative', []))
+        recommendations = []
+        for role in roles[:3]:
+            match_score = 70 + (len(skills) * 5)
+            if match_score > 95:
+                match_score = 95
+            recommendations.append({
+                'role': role,
+                'match_score': match_score,
+                'reason': f'Your {personality} personality is well-suited for this role'
+            })
+    
+    return jsonify({
+        'personality': personality,
+        'recommendations': recommendations
+    }), 200
+
+@bp.route('/history', methods=['GET'])
+@jwt_required()
+def get_history():
+    user_id = get_jwt_identity()
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT * FROM ai_logs WHERE user_id = ? ORDER BY timestamp DESC LIMIT 50
+    ''', (user_id,))
+    logs = cursor.fetchall()
+    conn.close()
+    
+    return jsonify([dict(row) for row in logs]), 200

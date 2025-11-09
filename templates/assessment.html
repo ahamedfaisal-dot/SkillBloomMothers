@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment - SkillBloom</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>🌸 SkillBloom</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard">📊 Dashboard</a></li>
+                <li><a href="/assessment" class="active">📝 Assessment</a></li>
+                <li><a href="/pods">🎯 My Pods</a></li>
+                <li><a href="#" id="logoutLink">🚪 Logout</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <header class="page-header">
+                <h1>Career Assessment</h1>
+                <p>Discover your strengths and ideal career path</p>
+            </header>
+
+            <div class="assessment-container">
+                <div class="assessment-steps">
+                    <div class="step active" data-step="1">
+                        <span class="step-number">1</span>
+                        <span class="step-label">Personality Test</span>
+                    </div>
+                    <div class="step" data-step="2">
+                        <span class="step-number">2</span>
+                        <span class="step-label">Skill Test</span>
+                    </div>
+                    <div class="step" data-step="3">
+                        <span class="step-number">3</span>
+                        <span class="step-label">Results</span>
+                    </div>
+                </div>
+
+                <div id="personalityTest" class="test-section active">
+                    <div class="card">
+                        <h2>Personality Assessment</h2>
+                        <p>Rate each statement on a scale of 1-5 (1 = Strongly Disagree, 5 = Strongly Agree)</p>
+                        
+                        <form id="personalityForm">
+                            <div id="personalityQuestions"></div>
+                            <button type="submit" class="btn btn-primary btn-large">Continue to Skill Test</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="skillTest" class="test-section">
+                    <div class="card">
+                        <h2>Skill Assessment</h2>
+                        <p>Select your domain and answer the questions</p>
+                        
+                        <div class="form-group">
+                            <label for="skillCategory">Choose your field:</label>
+                            <select id="skillCategory" class="form-control">
+                                <option value="">-- Select Category --</option>
+                                <option value="tech">Technology</option>
+                                <option value="design">Design</option>
+                                <option value="hr">Human Resources</option>
+                            </select>
+                        </div>
+                        
+                        <form id="skillForm" style="display: none;">
+                            <div id="skillQuestions"></div>
+                            <button type="submit" class="btn btn-primary btn-large">Submit Assessment</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="results" class="test-section">
+                    <div class="card results-card">
+                        <h2>🎉 Assessment Complete!</h2>
+                        <div id="resultsContent"></div>
+                        <div class="results-actions">
+                            <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
+                            <a href="/pods" class="btn btn-secondary">Explore Pods</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/assessment.js"></script>
+</body>
+</html>

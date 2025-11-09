@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SkillBloom</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>🌸 SkillBloom</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard" class="active">📊 Dashboard</a></li>
+                <li><a href="/assessment">📝 Assessment</a></li>
+                <li><a href="/pods">🎯 My Pods</a></li>
+                <li><a href="#" id="aiMentorLink">💬 AI Mentor</a></li>
+                <li><a href="#" id="logoutLink">🚪 Logout</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <header class="page-header">
+                <h1>Welcome back, <span id="userName">User</span>!</h1>
+                <p>Your career journey dashboard</p>
+            </header>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3>Assessment Results</h3>
+                    <div id="assessmentResults">
+                        <p class="loading">Loading assessment data...</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Pod Progress</h3>
+                    <canvas id="podProgressChart"></canvas>
+                </div>
+
+                <div class="card">
+                    <h3>Career Recommendations</h3>
+                    <div id="recommendations">
+                        <p class="loading">Analyzing your profile...</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Recent Activity</h3>
+                    <div id="recentActivity">
+                        <div class="activity-item">
+                            <span class="activity-icon">✅</span>
+                            <span>Account created successfully</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <h3>Quick Actions</h3>
+                <div class="action-buttons">
+                    <a href="/assessment" class="btn btn-primary">Take Assessment</a>
+                    <a href="/pods" class="btn btn-secondary">Explore Pods</a>
+                    <button class="btn btn-secondary" id="openChatbot">Chat with AI Mentor</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="chatbotModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💬 AI Mentor</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="chatbot-container">
+                <div id="chatMessages" class="chat-messages"></div>
+                <div class="chat-input-container">
+                    <input type="text" id="chatInput" placeholder="Ask me anything about your career journey...">
+                    <button id="sendChat" class="btn btn-primary">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Pods - SkillBloom</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>🌸 SkillBloom</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard">📊 Dashboard</a></li>
+                <li><a href="/assessment">📝 Assessment</a></li>
+                <li><a href="/pods" class="active">🎯 My Pods</a></li>
+                <li><a href="#" id="logoutLink">🚪 Logout</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <header class="page-header">
+                <h1>My Learning Pods</h1>
+                <p>Your personalized growth modules</p>
+            </header>
+
+            <div class="pods-grid">
+                <div class="pod-card" data-pod="skill">
+                    <div class="pod-header">
+                        <span class="pod-icon-large">💡</span>
+                        <h3>Skill Pod</h3>
+                    </div>
+                    <p>Build skills through curated content and projects</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" data-progress="0"></div>
+                    </div>
+                    <button class="btn btn-primary pod-btn" data-pod="skill">Explore</button>
+                </div>
+
+                <div class="pod-card" data-pod="company">
+                    <div class="pod-header">
+                        <span class="pod-icon-large">🏢</span>
+                        <h3>Company Pod</h3>
+                    </div>
+                    <p>Work on real projects from partner companies</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" data-progress="0"></div>
+                    </div>
+                    <button class="btn btn-primary pod-btn" data-pod="company">Explore</button>
+                </div>
+
+                <div class="pod-card" data-pod="health">
+                    <div class="pod-header">
+                        <span class="pod-icon-large">❤️</span>
+                        <h3>Health Pod</h3>
+                    </div>
+                    <p>Track your wellness and daily health metrics</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" data-progress="0"></div>
+                    </div>
+                    <button class="btn btn-primary pod-btn" data-pod="health">Explore</button>
+                </div>
+
+                <div class="pod-card" data-pod="baby_monitor">
+                    <div class="pod-header">
+                        <span class="pod-icon-large">👶</span>
+                        <h3>Baby Monitor Pod</h3>
+                    </div>
+                    <p>Monitor your baby's vitals in real-time</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" data-progress="0"></div>
+                    </div>
+                    <button class="btn btn-primary pod-btn" data-pod="baby_monitor">Explore</button>
+                </div>
+
+                <div class="pod-card" data-pod="mental_health">
+                    <div class="pod-header">
+                        <span class="pod-icon-large">🧠</span>
+                        <h3>Mental Health Pod</h3>
+                    </div>
+                    <p>Journal your thoughts and track emotional well-being</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" data-progress="0"></div>
+                    </div>
+                    <button class="btn btn-primary pod-btn" data-pod="mental_health">Explore</button>
+                </div>
+
+                <div class="pod-card" data-pod="post_placement">
+                    <div class="pod-header">
+                        <span class="pod-icon-large">📈</span>
+                        <h3>Post-Placement Pod</h3>
+                    </div>
+                    <p>Track career growth and salary progression</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" data-progress="0"></div>
+                    </div>
+                    <button class="btn btn-primary pod-btn" data-pod="post_placement">Explore</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="podModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="modalTitle">Pod Details</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div id="modalBody" class="pod-modal-body"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/pods.js"></script>
+</body>
+</html>
