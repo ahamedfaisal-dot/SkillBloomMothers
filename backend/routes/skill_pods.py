@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 import json
+from datetime import datetime
 from backend.models.database import get_db
 from backend.routes.ai_mentor import get_ai_mentor_response
 

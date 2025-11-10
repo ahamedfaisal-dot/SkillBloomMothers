@@ -20,10 +20,11 @@ let babyMonitorInterval;
 
 async function loadPodProgress() {
     try {
-        const response = await fetch(`${API_BASE}/api/pods/progress`, {
+        // Load general pods progress
+        const podsResponse = await fetch(`${API_BASE}/api/pods/progress`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        const pods = await response.json();
+        const pods = await podsResponse.json();
         
         pods.forEach(pod => {
             const progressBar = document.querySelector(`[data-pod="${pod.pod_type}"] .progress-fill`);
@@ -32,6 +33,35 @@ async function loadPodProgress() {
                 progressBar.setAttribute('data-progress', pod.progress);
             }
         });
+
+        // Load skill paths progress
+        const skillPathsResponse = await fetch(`${API_BASE}/api/skill-pods/paths`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const skillPaths = await skillPathsResponse.json();
+
+        skillPaths.paths.forEach(async path => {
+            try {
+                const progressResponse = await fetch(`${API_BASE}/api/skill-pods/progress/${path.id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (progressResponse.ok) {
+                    const progress = await progressResponse.json();
+                    const pathCard = document.querySelector(`[data-path-id="${path.id}"]`);
+                    if (pathCard) {
+                        const progressBar = pathCard.querySelector('.progress-fill');
+                        if (progressBar) {
+                            progressBar.style.width = `${progress.progress}%`;
+                            progressBar.setAttribute('data-progress', progress.progress);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error(`Error loading progress for skill path ${path.id}:`, error);
+            }
+        });
+
     } catch (error) {
         console.error('Error loading pod progress:', error);
     }

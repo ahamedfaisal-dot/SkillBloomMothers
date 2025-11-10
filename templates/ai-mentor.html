@@ -7,27 +7,41 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="brand">
-            <h1>SkillBloom</h1>
-        </div>
-        <div class="nav-links">
-            <a href="/dashboard">Dashboard</a>
-            <a href="/assessment">Assessment</a>
-            <a href="/pods">Learning Pods</a>
-            <a href="/baby-monitor">Baby Monitor</a>
-            <a href="/ai-mentor" class="active">AI Mentor</a>
-            <a href="/logout">Logout</a>
-        </div>
-    </nav>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>SkillBloom</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/assessment">Assessment</a></li>
+                <li><a href="/pods">Learning Pods</a></li>
+                <li><a href="/baby-monitor">Baby Monitor</a></li>
+                <li><a href="/ai-mentor" class="active">AI Mentor</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
 
-    <main class="container">
-        <h1>AI Mentor</h1>
-        <div id="mentor-container">
-            <!-- AI mentor chat interface will be loaded here -->
-            <p>AI mentor feature coming soon!</p>
-        </div>
-    </main>
+        <main class="main-content">
+            <header class="page-header">
+                <h1>AI Mentor</h1>
+                <p>Personalized mentoring powered by AI — start a chat or ask for guidance.</p>
+            </header>
+
+            <section class="card">
+                <div class="chatbot-container">
+                    <div id="chatMessages" class="chat-messages">
+                        <div class="loading">AI mentor feature coming soon.</div>
+                    </div>
+
+                    <div class="chat-input-container" style="margin-top: 12px;">
+                        <input id="chatInput" placeholder="Ask the AI mentor a question (demo)..." />
+                        <button id="sendBtn" class="btn btn-primary">Send</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
 
     <script src="/static/js/auth.js"></script>
     <script src="/static/js/ai-mentor.js"></script>

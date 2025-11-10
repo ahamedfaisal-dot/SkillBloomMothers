@@ -117,3 +117,52 @@ def get_stats():
         'total_readings': len(recent_data),
         'last_updated': datetime.now().isoformat()
     }), 200
+
+
+@bp.route('/profile', methods=['GET'])
+@jwt_required()
+def get_profile():
+    user_id = get_jwt_identity()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, user_id, name, weight, height, camera_url, created_at, updated_at FROM baby_profiles WHERE user_id = ?', (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if not row:
+        return jsonify({}), 200
+    return jsonify(dict(row)), 200
+
+
+@bp.route('/profile', methods=['POST'])
+@jwt_required()
+def save_profile():
+    user_id = get_jwt_identity()
+    body = request.get_json() or {}
+    name = body.get('name')
+    weight = body.get('weight')
+    height = body.get('height')
+    camera_url = body.get('camera_url')
+
+    conn = get_db()
+    cursor = conn.cursor()
+    # check if exists
+    cursor.execute('SELECT id FROM baby_profiles WHERE user_id = ?', (user_id,))
+    existing = cursor.fetchone()
+    try:
+        if existing:
+            cursor.execute('''
+                UPDATE baby_profiles
+                SET name = ?, weight = ?, height = ?, camera_url = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = ?
+            ''', (name, weight, height, camera_url, user_id))
+        else:
+            cursor.execute('''
+                INSERT INTO baby_profiles (user_id, name, weight, height, camera_url)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (user_id, name, weight, height, camera_url))
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        return jsonify({'error': str(e)}), 500
+    conn.close()
+    return jsonify({'status': 'saved'}), 200

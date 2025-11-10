@@ -1,12 +1,12 @@
 :root {
-    /* Milky Gold theme variables */
-    --primary-teal: #D4AF37; /* main gold accent */
-    --secondary-lavender: #EBCB7B; /* lighter gold accent */
-    --dark-bg: #fffdf9; /* user-requested milky background */
-    --card-bg: #FFF6E6; /* slightly warm card background */
-    --text-primary: #2C2A2A; /* dark text for readability */
-    --text-secondary: #6B5E47; /* muted brown/bronze for secondary text */
-    --border-color: #E6D6A7; /* soft pale gold border */
+    /* Pink theme variables (matches pods visual) */
+    --primary-teal: #DB7093; /* primary pink accent used across site */
+    --secondary-lavender: #FFB6C1; /* lighter pink accent */
+    --dark-bg: #ffeef4; /* very light pink background */
+    --card-bg: #fff8fb; /* pale card background */
+    --text-primary: #3a2a2f; /* dark muted for readability */
+    --text-secondary: #8b5f6e; /* muted pinky-brown for secondary text */
+    --border-color: #ffd7e2; /* soft pale pink border */
     --success: #16A34A;
     --error: #DC2626;
     --warning: #F97316;

@@ -55,6 +55,21 @@ def init_db():
         )
     ''')
     
+    # Add skill_enrollments table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS skill_enrollments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            path_id TEXT NOT NULL,
+            progress INTEGER DEFAULT 0,
+            completed_skills TEXT,  -- JSON array of completed skill IDs
+            assessment_results TEXT,  -- JSON object with assessment scores
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS ai_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,6 +89,21 @@ def init_db():
             motion TEXT,
             sleep_status TEXT,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+
+    # Profiles for baby monitor (per-user settings)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS baby_profiles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            name TEXT,
+            weight REAL,
+            height REAL,
+            camera_url TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     ''')
